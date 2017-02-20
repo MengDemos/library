@@ -44,6 +44,7 @@ If we change the Unix socket owner to user/group ubuntu, Nginx will then return 
     listen.group = ubuntu
 
 So, file permissions are the security mechanism for PHP-FPM when using a unix socket. The faux-file's user/group and it's user/group/other permissions determines what local users and processes and read and write to the PHP-FPM socket.
+
 ###TCP Sockets
 
 Setting the Listen directive to a TCP socket (ip address and port) makes PHP-FPM listen over the network rather than as a unix socket. This makes PHP-FPM able to be listened to by remote servers (or still locally over the localhost network).
@@ -58,13 +59,22 @@ PHP-FPM:
     listen.allowed_clients = 127.0.0.1
 
 Nginx:
-
-# Files: /etc/nginx/sites-available/default
-
-    # ... stuff omitted
-
+Files: /etc/nginx/sites-available/default
+    
     server ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass 127.0.0.1:9000;
     }
 
+###Restart PHP-FPM process
+    sudo kill -USR2 php-fpm_main_process_id
+    
+So we just need to instruct php-fpm to record its pid somewhere. In this example, I'll assume you want to save it at /etc/private/php-fpm.pid, and that php-fpm runs as user _php. First, add this line to the configuration file:
+
+    pid = /etc/php-fpm.pid
+    
+run command to restart:
+
+    cat $(find /home/scrutinizer/.phpenv/versions -type f -name 'php-fpm.pid') | xargs sudo kill -USR2
+    
+    
