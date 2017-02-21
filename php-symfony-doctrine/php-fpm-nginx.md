@@ -79,9 +79,9 @@ find the pid file `php-fpm.pid` and excute the kill command:
     # Alternative
     killall -USR2 php-fpm
     
-##Nginx Configuration with PHP-FPM
+###Nginx Configuration with PHP-FPM
 
-1. create FCGI config file in `etc/nginx/sites-enabled/test`:
+* create FCGI config file in `etc/nginx/sites-enabled/test` :
 ```
 server {
     listen 80 default_server;
@@ -117,10 +117,11 @@ server {
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
 }
+
 ```
-2. set up the `fastcgi_pass` the same as `listen` in php-fpm configuration file `/etc/php-fpm/php-fpm.d/www.conf` (can be different)to same port.
+* set up the `fastcgi_pass` the same as `listen` in php-fpm configuration file `/etc/php-fpm/php-fpm.d/www.conf` (can be different)to same port.
 ```
 listen = 127.0.0.1:9000
 ```
-3. test
-> echo '<?php var_export($_SERVER)?>' > <root>/index.php
+* test
+    echo '<?php var_export($_SERVER)?>' > <root>/index.php
