@@ -73,8 +73,54 @@ So we just need to instruct php-fpm to record its pid somewhere. In this example
 
     pid = /etc/php-fpm.pid
     
-run command to restart:
+find the pid file `php-fpm.pid` and excute the kill command:
 
     cat $(find /home/scrutinizer/.phpenv/versions -type f -name 'php-fpm.pid') | xargs sudo kill -USR2
+    # Alternative
+    killall -USR2 php-fpm
     
-    
+##Nginx Configuration with PHP-FPM
+
+1. create FCGI config file in `etc/nginx/sites-enabled/test`:
+```
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+
+    # Make site accessible from http://localhost/
+    server_name localhost;
+
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files $uri $uri/ /index.html;
+        # Uncomment to enable naxsi on this location
+        # include /etc/nginx/naxsi.rules
+    }
+
+    location ~ [^/]\.php(/|$) {
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        if (!-f $document_root$fastcgi_script_name) {
+            return 404;
+        }
+
+        # Mitigate https://httpoxy.org/ vulnerabilities
+        fastcgi_param HTTP_PROXY "";
+
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+}
+```
+2. set up the `fastcgi_pass` the same as `listen` in php-fpm configuration file `/etc/php-fpm/php-fpm.d/www.conf` (can be different)to same port.
+```
+listen = 127.0.0.1:9000
+```
+3. test
+> echo '<?php var_export($_SERVER)?>' > <root>/index.php
