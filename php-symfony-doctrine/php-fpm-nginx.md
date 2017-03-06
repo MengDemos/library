@@ -81,8 +81,9 @@ find the pid file `php-fpm.pid` and excute the kill command:
     
 ###Nginx Configuration with PHP-FPM
 
-* create FCGI config file in `etc/nginx/sites-enabled/test` :
-```
+1. create FCGI config file in `etc/nginx/sites-enabled/test` :
+
+```JSON
 server {
     listen 80 default_server;
     listen [::]:80 default_server ipv6only=on;
@@ -119,9 +120,22 @@ server {
 }
 
 ```
-* set up the `fastcgi_pass` the same as `listen` in php-fpm configuration file `/etc/php-fpm/php-fpm.d/www.conf` (can be different)to same port.
+
+1. set up the `fastcgi_pass` the same as `listen` in php-fpm configuration file `/etc/php-fpm/php-fpm.d/www.conf` (can be different)to same port.
+
 ```
 listen = 127.0.0.1:9000
 ```
-* test
+
+1. test
+
     echo '<?php var_export($_SERVER)?>' > <root>/index.php
+ 
+1. Tip - Prevent (deny) Access to Hidden Files with Nginx 
+It’s very common that server root or other public directories have hidden files, which starts with dot (.) and normally those is not intended to site users. Public directories can contain version control files and directories, like .svn, some IDE properties files and .htaccess files. Following deny access and turn off logging for all hidden files. 
+
+    location ~ /\. {
+        access_log off;
+        log_not_found off; 
+        deny all;
+    }
